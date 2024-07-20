@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelera de Cine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #b9090b; /* Rojo similar al de Netflix */
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .title {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* Espacio entre cada contenedor de películas */
+        }
+
+        .movie {
+    flex: 0 0 calc(33.33% - 20px); /* 3 columnas con espacio entre ellas */
+    margin: 10px;
+    padding: 0; /* Eliminar padding para evitar espacio adicional */
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid transparent; /* Borde transparente */
+    transition: transform 5s ease-in-out, border-width 0.3s ease-in-out; /* Transiciones */
+}
+
+.movie img {
+    max-width: 100%;
+    height: auto;
+    display: block; /* Asegurar que la imagen no tenga espacio adicional */
+    border-radius: 5px; /* Añadir borde redondeado */
+    transition: transform 5s ease-in-out; /* Transición para escalar la imagen */
+}
+
+.movie p {
+    margin: 10px 0 0; /* Ajustar margen superior del párrafo */
+    color: black; /* Color de texto negro */
+    font-family: PUSAB2, Arial, sans-serif; /* Fuente PUSAB2 */
+    transition: transform 5s ease-in-out; /* Transición para escalar el texto */
+}
+
+.movie:hover img {
+    transform: scale(1.1); /* Escalar la imagen al hacer hover */
+}
+
+.movie:hover p {
+    transform: scale(1.1); /* Escalar el texto al hacer hover */
+}
+
+.movie:hover {
+    transform: scale(1.05); /* Escalar el contenedor al hacer hover */
+    border-color: rgba(255, 255, 255, 0.5); /* Borde blanco semitransparente al hacer hover */
+}
+
+        #playMusicButton, #stopMusicButton {
+            background-color: #fff;
+            color: #b9090b;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .volume-control {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .volume-control label {
+            margin-right: 10px;
+            color: white;
+        }
+
+        .volume-control input[type="range"] {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">Cartelera de Cine</h1>
+
+        
+
+        <div class="movie" onclick="playVideo('ESTRENO 2024_ Pelicula_ Completa en Espanol Latino HD(720P_HD).mp4')">
+            <img src="imagenes/intensamente_2.jpg" alt="Intensamente 2">
+            <p>Intensamente 2</p>
+        </div>
+    </div>
+
+
+    <audio id="backgroundMusic" loop></audio>
+
+    <p>Creado por Zejoshua Hernández Gómez</p>
+    <script>
+        const musicFiles = [
+            'musicas/Machina.mp3',
+            'musicas/Dash.mp3',
+            'musicas/490479.mp3',
+            // Añade más archivos de música según sea necesario
+        ];
+
+        const randomIndex = Math.floor(Math.random() * musicFiles.length);
+        const selectedMusic = musicFiles[randomIndex];
+        const audioElement = document.getElementById('backgroundMusic');
+        audioElement.src = selectedMusic;
+        audioElement.volume = 0.150; // Establecer un volumen inicial
+
+        const playMusicButton = document.getElementById('playMusicButton');
+        const stopMusicButton = document.getElementById('stopMusicButton');
+
+        function animateElements() {
+    document.querySelectorAll('.movie img, .movie p').forEach(el => {
+        el.style.transform = 'scale(1.2)';
+    });
+    document.querySelectorAll('.movie').forEach(movie => {
+        movie.style.borderWidth = '2px'; // Aumentar el tamaño del borde
+    });
+    setTimeout(() => {
+        document.querySelectorAll('.movie img, .movie p').forEach(el => {
+            el.style.transform = 'scale(1)';
+        });
+        document.querySelectorAll('.movie').forEach(movie => {
+            movie.style.borderWidth = '1px'; // Reducir el tamaño del borde
+        });
+    }, 5000);
+}
+
+
+        let animationInterval;
+
+        playMusicButton.addEventListener('click', () => {
+            audioElement.play().catch(error => {
+                console.error('Error al intentar reproducir el audio:', error);
+            });
+            playMusicButton.style.display = 'none';
+            stopMusicButton.style.display = 'block';
+
+            // Subir el volumen gradualmente
+            const fadeInInterval = setInterval(() => {
+                if (audioElement.volume < 0.5) {
+                    audioElement.volume = Math.min(0.5, audioElement.volume + 0.05);
+                } else {
+                    clearInterval(fadeInInterval);
+                }
+            }, 200); // Ajustar el tiempo para una subida suave
+
+            animationInterval = setInterval(animateElements, 10000); // Repetir animación cada 10 segundos
+            animateElements(); // Iniciar la primera animación inmediatamente
+        });
+
+        stopMusicButton.addEventListener('click', () => {
+            const fadeOutInterval = setInterval(() => {
+                if (audioElement.volume > 0) {
+                    audioElement.volume = Math.max(0, audioElement.volume - 0.05); // Reducir volumen poco a poco
+                } else {
+                    clearInterval(fadeOutInterval);
+                    audioElement.pause(); // Pausar el audio cuando el volumen sea 0
+                    audioElement.currentTime = 0; // Reiniciar la canción
+                    playMusicButton.style.display = 'block';
+                    stopMusicButton.style.display = 'none';
+
+                    clearInterval(animationInterval); // Detener la animación
+                    document.querySelectorAll('.movie img, .movie p').forEach(el => {
+                        el.style.transform = 'scale(1)'; // Volver al tamaño inicial
+                    });
+                    document.querySelectorAll('.movie').forEach(movie => {
+                        movie.style.borderWidth = '1px'; // Volver al tamaño del borde inicial
+                    });
+                }
+            }, 200); // Ajustar el tiempo para una reducción suave
+        });
+
+        const volumeControl = document.getElementById('volumeRange');
+        volumeControl.addEventListener('input', function() {
+            audioElement.volume = this.value;
+        });
+
+        function playVideo(videoName) {
+            window.location.href = `reproductor.html?video=${videoName}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Cine</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('imagenes/cine_1.png');
+            background-size: 1400px 1080px; /* Ancho y altura específicos */
+            background-repeat: no-repeat; /* Evitar repetición de la imagen */
+            background-position: center 30%; /* Centrado horizontal y posición vertical personalizada */
+            transition: background-color 5s;
+            flex-direction: column;
+            position: relative; /* Añadir posición relativa para alinear elementos absolutos */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo negro semitransparente */
+            z-index: -1; /* Colocar detrás del contenido principal */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        video {
+            max-width: 90%;
+            max-height: 80%;
+            margin-top: -5%;
+        }
+
+        .return-message {
+            position: absolute;
+            bottom: 0px;
+            right: 20px;
+            color: white;
+            font-size: 18px;
+            text-align: right;
+            z-index: 1;
+        }
+
+        .person-image {
+            position: absolute;
+            bottom: 21px;
+            right: 0px;
+            max-width: 150px; /* Ajustar el tamaño de la imagen */
+            z-index: 1;
+        }
+
+        .return-button {
+            position: absolute;
+            bottom: 30px; /* Posición vertical desde el borde inferior */
+            right: 120px; /* Posición horizontal desde el borde derecho */
+            padding: 10px 20px;
+            background-color: #b9090b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <button id="playButton">Reproducir Video</button>
+    <video id="video" controls class="hidden">
+        Tu navegador no soporta la reproducción de videos.
+    </video>
+
+    <script>
+        const playButton = document.getElementById('playButton');
+        const video = document.getElementById('video');
+        let isPaused = false;
+
+        // Función para obtener el nombre del video desde la URL
+        function getVideoNameFromURL() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            return urlParams.get('video');
+        }
+
+        // Función para reproducir el video seleccionado
+        function playSelectedVideo() {
+            const videoName = getVideoNameFromURL();
+            if (videoName) {
+                video.src = videoName;
+                video.classList.remove('hidden');
+                playButton.classList.add('hidden');
+                video.play();
+                document.querySelector('.overlay').style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                isPaused = false;
+            } else {
+                console.error('No se encontró el nombre del video en la URL.');
+            }
+        }
+
+        // Evento click para reproducir el video al presionar el botón
+        playButton.addEventListener('click', playSelectedVideo);
+
+        // Evento para manejar el cambio de color de fondo al reproducir el video
+        video.addEventListener('play', () => {
+            let shade = 255;
+            const interval = setInterval(() => {
+                shade -= 5;
+                if (shade <= 0) {
+                    shade = 0;
+                    clearInterval(interval);
+                }
+                if (!isPaused) {
+                    document.querySelector('.overlay').style.backgroundColor = `rgba(${shade}, ${shade}, ${shade}, 0.8)`;
+                }
+            }, 20);
+        });
+
+        // Evento para manejar el cambio de color de fondo al finalizar el video
+        video.addEventListener('ended', () => {
+            let shade = 0;
+            const interval = setInterval(() => {
+                shade += 5;
+                if (shade >= 50) {
+                    shade = 50;
+                    clearInterval(interval);
+                    showReturnElements(); // Mostrar elementos al finalizar el video
+                }
+                document.querySelector('.overlay').style.backgroundColor = `rgba(${shade}, ${shade}, ${shade}, 0.8)`;
+            }, 20);
+        });
+
+        // Función para mostrar elementos al finalizar el video
+        function showReturnElements() {
+            const returnMessage = document.createElement('div');
+            returnMessage.textContent = 'Tu video finalizó, por favor vuelve a la cartelera para seleccionar otro video';
+            returnMessage.classList.add('return-message');
+            document.body.appendChild(returnMessage);
+
+            const personImage = document.createElement('img');
+            personImage.src = 'imagenes/persona_cine.png';
+            personImage.alt = 'Persona Cine';
+            personImage.classList.add('person-image');
+            document.body.appendChild(personImage);
+
+            const returnButton = document.createElement('button');
+            returnButton.textContent = 'Volver a la Cartelera';
+            returnButton.classList.add('return-button');
+            returnButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            document.body.appendChild(returnButton);
+        }
+
+        // Reproducir el video seleccionado al cargar la página
+        window.onload = playSelectedVideo;
+    </script>
+</body>
+</html>
